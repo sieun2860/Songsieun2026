@@ -12,7 +12,7 @@ public class PlayerController : MonoBehaviour
     public float fallLimit = -10f;
     public Vector3 startPosition;
     public Transform visual;
-    public Vector2 airScale = new Vector2(0.8f, 1.2f);
+    public Vector2 airScale = new Vector2(0.99f, 1.01f);
     public TMP_Text livesText;
     public GameObject gameOverPanel;
     public string nextSceneName = "Stage2";
@@ -75,17 +75,42 @@ public class PlayerController : MonoBehaviour
         { isGrounded = false; }
     }
 
+
     void OnTriggerEnter2D(Collider2D other)
     {
         if (other.CompareTag("Goal"))
         {
-            SceneManager.LoadScene(nextSceneName);
+            string currentScene = SceneManager.GetActiveScene().name;
+
+            if (currentScene == "Stage1")
+            {
+                SceneManager.LoadScene("Stage2");
+            }
+            else if (currentScene == "Stage2")
+            {
+                GoalStageTransition goal =
+                    other.GetComponentInParent<GoalStageTransition>();
+
+                if (goal != null)
+                {
+                    goal.ChangeAndNextStage();
+                }
+                else
+                {
+                    Debug.LogError("Goal 오브젝트에 GoalStageTransition이 없습니다.");
+                }
+            }
+            else if (currentScene == "Stage3")
+            {
+                SceneManager.LoadScene("Ending");
+            }
         }
         else if (other.CompareTag("Trap"))
         {
             LoseLife();
         }
     }
+
     void LoseLife()
     {
         lives -= 1;
